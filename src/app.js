@@ -28,6 +28,8 @@ export class App {
       // },
     ]
 
+    //WebSocket
+    this.websocket();
     //Events Handler
     this.eventsConfig();
     //Middleware's
@@ -60,6 +62,25 @@ export class App {
     });
     this.app.use(defaultError404);
     this.app.use(defaultError500);
+  }
+
+  websocket() {
+    this.io.on('connection', (socket) => {
+
+      eventEmitter.emit('SOCKET_CONNECT', socket);
+      
+      socket.on('disconnect', () => {
+        eventEmitter.emit('SOCKET_DISCONNECT', socket);
+      });
+
+      socket.on('SEND_MESSAGE', (request) => {
+        const payload = {
+          socket: socket,
+          request
+        }
+        eventEmitter.emit('SOCKET_MESSAGE',payload);
+      });
+    })
   }
 
   start() {
